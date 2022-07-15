@@ -1,0 +1,544 @@
+---
+title: "cryptography course project"
+author: "Dynasty"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Introduction**
+
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process.
+The columns in the data set include:
+      * Daily_Time_Spent_on_Site
+      
+      * Age
+      
+      * Area_Income
+      
+      * Daily_Internet_Usage
+      
+      * Ad_Topic_Line
+      
+      * City
+      
+      * Male
+      
+      * Country
+      
+      * Time stamp
+      
+      * Clicked_on_Ad
+
+##**Problem Statement**
+
+She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads. 
+
+### **Metrics of Success**
+
+1. Define the question, the metric for success, the context, experimental design taken and the appropriateness of the available data to answer the given question.
+
+2. Find and deal with outliers, anomalies, and missing data within the data set.
+
+3. Perform  uni variate and bivariate analysis.
+
+4. From your insights provide a conclusion and recommendation.
+
+
+## **Loading our data set**
+
+```{r}
+library(data.table)
+advert <- fread('http://bit.ly/IPAdvertisingData')
+```
+
+
+Now let's preview our dataset
+
+#### First six rows
+```{r}
+head(advert)
+```
+
+
+
+Will check the class or datatypes in the data set
+
+```{r}
+str(advert)
+```
+
+
+Lets check number of rows and columns
+
+```{r}
+dim(advert)
+```
+
+
+Data set attributes
+
+```{r}
+class(advert)
+```
+
+## **Data Cleaning and Data Preparation**
+
+1. checking for nulls/missing values
+
+```{r}
+is.null(advert)
+```
+ we don't have null values.
+ 
+ 
+2. Checking for duplicates
+
+```{r}
+duplicated_rows <- advert[duplicated(advert),]
+duplicated_rows
+```
+
+We have no duplicates
+
+
+3. Checking for outliers
+
+We have four numeric columns so will check outliers in them
+```{r}
+library(tidyverse)
+```
+
+
+
+Let's see if we have any outliers in age, as the boxplot shows we have no outliers
+
+```{r}
+boxplot(advert$Age, ylab = "Age")
+```
+
+
+
+
+
+
+
+
+
+Let's see if we have outliers in area income
+
+```{r}
+boxplot(advert$`Area Income`, ylab = "Area Income")
+```
+
+
+
+
+
+
+
+Let's check for outliers in Daily internal usage, we have no outliers as the graph shows
+
+```{r}
+boxplot(advert$`Daily Internet Usage`, ylab = "Daily Internet Usage")
+```
+
+
+
+
+
+
+
+Let's check for outliers inthe last numeric column
+
+```{r}
+boxplot(advert$`Daily Time Spent on Site`, ylab = "Daily Time Spent on Site")
+```
+
+
+
+
+
+
+
+
+# **Exploratory Data Analysis**
+
+### **1. Uni variate Analysis**
+
+
+Now well move to exploratory data analysis
+
+#####**Measures of central Tendancy**
+
+Age
+
+a. Let's see the mean age of the the audience in our client's blog
+
+```{r}
+age.mean <- mean(advert$Age)
+age.mean
+```
+
+The mean age of most audience is around the age of 36 years 
+
+
+b. Let's see the age range
+
+```{r}
+age.range <- range(advert$Age)
+age.range
+```
+
+We can see most of the audience age range is between 19 to 61 years.
+
+
+
+c. Let's see what most of the audiences age bracket is
+
+```{r}
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+```
+
+```{r}
+age.mode <- getmode(advert$Age)
+age.mode
+```
+
+
+Most of the audience are 31 years
+
+
+
+
+Visualizing these results
+
+```{r}
+ggplot(advert, aes(x=Age)) + geom_histogram(color="white", fill="blue")
+```
+
+
+d. Let's check country where most of the audiences come from
+
+```{r}
+country.mode <- getmode(advert$Country)
+country.mode
+```
+
+
+Most audiences come from Czech Republic.
+
+
+e. Let's see country with the minimum hits onthe ads
+
+```{r}
+country.min <- min(advert$Country)
+country.min
+```
+
+
+
+f. Let's also check the city with most audiences
+
+```{r}
+city.mode <- getmode(advert$City)
+city.mode
+```
+
+g. Let's also check the city with least audiences
+
+```{r}
+city.min <- min(advert$City)
+city.min
+```
+
+h. We can also check the frequent Ad line topic
+
+```{r}
+topic.mode <- getmode(advert$`Ad Topic Line`)
+topic.mode
+```
+
+
+i. Let's also check for least frequent ad topic line
+```{r}
+topic.min <- min(advert$`Ad Topic Line`)
+topic.min
+```
+
+
+j. Let's see mean daily time spent on site
+
+```{r}
+time.mean <- mean(advert$`Daily Time Spent on Site`)
+time.mean
+```
+
+
+k. Let's check the range of time spent on site daily
+
+```{r}
+time.range <- range(advert$`Daily Time Spent on Site`)
+time.range
+```
+
+
+
+Will visualize these in a histogram
+
+```{r}
+hist((advert$`Daily Time Spent on Site`),  
+main = "Histogram of Daily Time Spent on site",
+     xlab = 'Daily Time Spent on Site', 
+     ylab = 'Frequency',
+     col = "blue")
+```
+
+l. determining mean area income
+
+```{r}
+area.mean <- mean(advert$`Area Income`)
+area.mean
+```
+
+m. Range of area income
+
+```{r}
+area.range <- range(advert$`Area Income`)
+area.range
+```
+
+
+
+Visualize these results
+
+```{r}
+hist((advert$`Area Income`),  
+main = "Histogram of Daily Intenet Usage",
+     xlab = 'Area Income', 
+     ylab = 'Frequency',
+     col = "blue")
+```
+
+
+n. Determining mean Daily internet usage
+
+```{r}
+usage.mean <- mean(advert$`Daily Internet Usage`)
+usage.mean
+```
+
+ o. range of internet usage daily
+ 
+```{r}
+usage.range <- range(advert$`Daily Internet Usage`)
+usage.range
+```
+ 
+ 
+ Will visualize this below
+```{r}
+hist((advert$`Daily Internet Usage`),  
+main = "Histogram of Daily Intenet Usage",
+     xlab = 'Daily Internet Usage', 
+     ylab = 'Frequency',
+     col = "blue")
+```
+ 
+ 
+ 
+ 
+ 
+ 
+ p. Now let's visualize gender distribution
+ 
+```{r}
+gender <- (advert$Male)
+gender.frequency <- table(gender)
+gender.frequency
+```
+ 
+
+```{r}
+barplot(gender.frequency,
+  main="A bar chart showing Gender of those who clicked",
+  xlab="Gender(0 = Female, 1 = Male)",
+  ylab = "Frequency",
+  col=c("magenta","blue"),
+  )
+```
+  
+  
+  
+  
+  We see there are more females than male
+  
+  
+  
+  
+q. Now let's visualize clicks distribution
+ 
+```{r}
+click <- (advert$`Clicked on Ad`)
+click.frequency <- table(click)
+click.frequency
+```
+
+
+
+```{r}
+barplot(click.frequency,
+  main="A bar chart showing frequency of those who clicked and those who didn't",
+  xlab="Click(0 = Yes, 1 = No)",
+  ylab = "Frequency",
+  col=c("brown","blue"),
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+### **Bivariate and Multivariate Analysis**
+
+
+Here will be comparing two or more variables to try and understand their comparison 
+
+```{r}
+plot((advert$`Daily Time Spent on Site`), (advert$Age), 
+     main = "A scatterplot of Time Spent on site against age",
+     xlab = 'Time spent', 
+     ylab = 'Age')
+```
+
+
+
+
+
+We see there is concentration of Time spent daily on the site in relation to Age is concentrated on around 30s age bracket
+
+
+
+
+```{r}
+plot((advert$`Area Income`), (advert$Age), 
+     main = "A scatterplot of Area income on site against age",
+     xlab = 'Area Income', 
+     ylab = 'Age')
+```
+
+
+Most people concentrate around 50000 to 70000 area income for the majority age bracket
+
+
+
+
+
+
+```{r}
+plot((advert$`Daily Time Spent on Site`), (advert$`Daily Internet Usage`), 
+     main = "A scatterplot of Time Spent on site and ad clicked against Daily Internet Usage",
+     xlab = 'Time Spent on Site', 
+     ylab = 'Daily Internet Usage')
+```
+
+
+
+
+Internet usage and time spent has a linear correlation
+
+
+
+
+
+
+```{r}
+ggplot(advert,aes(x=advert$`Area Income`,y=advert$Age,col=advert$`Clicked on Ad`))+geom_point(aes(color=advert$`Clicked on Ad`))
+```
+
+
+
+
+
+
+The graph shows us that The higher the income the more the clicks but also mostly concentrated around the 30s age bracket.
+
+
+
+
+
+
+Let's see click vs gender
+```{r}
+ggplot(advert,aes(x=gender,y=Age,col=advert$`Clicked on Ad`))+geom_point(aes(color=advert$`Clicked on Ad`))
+```
+
+
+
+Despite most audience visiting the site being female , most of the those who click the add are male
+
+
+
+
+
+Let.s check for correlation
+
+```{r}
+library(corrplot)
+```
+```{r}
+numeric <- advert %>%
+  select_if(is.numeric) %>%
+  select("Daily Time Spent on Site", "Age", "Area Income", "Daily Internet Usage")
+```
+
+```{r}
+corrplot(cor(numeric))
+```
+
+
+
+
+
+There a positive correlation observed inth plot between Daily internet usage vs time spent on internet daily.
+
+There is also some correlation between area income and internet usage and time
+
+
+
+## **Conclusion**
+
+* The mean age of most audience is 36 years with most of the audience being around age 31 and the range of audience visiting the site is between 19 and 61 years.
+
+* The mean time spent on site is 65 minutes with a range between 32 to 91 minutes on the site.
+
+* The mean Daily Internet Usage is 180 with a range 104 to 269.
+* The mean area income is 55000 with a range of 13996 - 79484.
+* The country with most audience is Czech Republic and the least was Afghanistan.
+* There are more females visiting the site compared to males, however, for those actually clicking the ads the most are males.
+* There is a strong correlation between time spent and internet usage on the site which comes out as expected.
+* The age of most audiences clicking on the site has a correlation also with the area income i.e. most of those clicking the add around 30 years bracket also has an area income above 50000.
+
+
+## **Recommendation**
+
+* To first answer our stakeholder question of which individuals are most likely to click on her ads: These individuals are male around the age 30 to 35 with an area income above 50000.
+
+* More advertisement need to be done locally however not meaning they should focus only on local audience.
+
+* Most of the those who click on the ad have an area income above 50000, so maybe reevaluate the prices or other ways to attract those in low income areas.
+
